@@ -38,6 +38,7 @@ from google.adk.tools.tool_context import ToolContext
 from google.genai.types import Content, Part
 from mcp import StdioServerParameters
 
+from core.llm_factory import build_llm_with_fallback
 from core.schemas import AgentDecision, ResearchBrief, VerificationClaim, VerificationResult, hash_payload
 
 from .prompts import VERIFIER_PROMPT
@@ -234,7 +235,7 @@ def build_verifier_agent() -> LlmAgent:
     """
     return LlmAgent(
         name="Verifier",
-        model=_LLM_MODEL,
+        model=build_llm_with_fallback(),
         instruction=VERIFIER_PROMPT,
         tools=[_make_research_toolset(), FunctionTool(func=submit_verification_result)],
         description=(

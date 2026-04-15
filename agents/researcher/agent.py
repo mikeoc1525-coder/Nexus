@@ -37,6 +37,7 @@ from google.adk.tools.tool_context import ToolContext
 from google.genai.types import Content, Part
 from mcp import StdioServerParameters
 
+from core.llm_factory import build_llm_with_fallback
 from core.schemas import AgentDecision, ResearchBrief, hash_payload
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -74,7 +75,7 @@ logger = logging.getLogger(__name__)
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 _RESEARCH_SERVER = str(_REPO_ROOT / "mcp_servers" / "research_server.py")
 _PYTHON = sys.executable
-_LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.0-flash")
+_LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.0-flash")  # fallback if factory not used
 
 
 # ─── MCP Toolset ──────────────────────────────────────────────────────────────
@@ -181,7 +182,7 @@ def build_researcher_agent() -> LlmAgent:
     """
     return LlmAgent(
         name="Researcher",
-        model=_LLM_MODEL,
+        model=build_llm_with_fallback(),
         instruction=RESEARCHER_PROMPT,
         tools=[_make_research_toolset(), FunctionTool(func=submit_research_brief)],
         description=(
